@@ -1,0 +1,9 @@
+ros-humble-elite-robots-msgs (1.0.0-1jammy) jammy; urgency=high
+
+  * First public release of the Elite Robots message and service interfaces.
+  * Renamed the package to ``elite_robots_msgs``.
+  * Contributors: Yan
+
+ -- "Ivan" <yanxiaojia@elibot.cn>  Tue, 28 Jul 2026 16:00:00 -0000
+
+

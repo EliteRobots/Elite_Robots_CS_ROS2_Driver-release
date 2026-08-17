@@ -17,9 +17,11 @@ tracks:
     - git-bloom-generate -y rosdynrpm --prefix release/:{ros_distro} :{ros_distro}
       -i :{release_inc} --require-os fedora rhel
     devel_branch: null
+    last_release: humble-1.0.0
+    last_version: 1.0.0
     name: upstream
     patches: null
-    release_inc: 0
+    release_inc: '1'
     release_repo_url: null
     release_tag: humble-1.0.0
     ros_distro: humble

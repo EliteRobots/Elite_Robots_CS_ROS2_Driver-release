@@ -1,9 +1,0 @@
-ros-humble-elite-robots (1.0.0-2jammy) jammy; urgency=high
-
-  * First public release.
-  * Added a single installation point for the Elite Robots ROS 2 packages.
-  * Contributors: Ivan
-
- -- "Ivan" <yanxiaojia@elibot.cn>  Tue, 28 Jul 2026 16:00:00 -0000
-
-

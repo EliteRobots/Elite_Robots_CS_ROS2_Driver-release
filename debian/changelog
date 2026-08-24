@@ -1,0 +1,10 @@
+ros-humble-elite-robots-moveit-config (1.0.0-2jammy) jammy; urgency=high
+
+  * First public release of the Elite Robots MoveIt 2 configuration.
+  * Added planning, kinematics, controller, SRDF, RViz, and launch configurations.
+  * Renamed the package and MoveIt launch files.
+  * Contributors: Yan
+
+ -- "chenshichao" <chenshichao@elibot.cn>  Tue, 28 Jul 2026 16:00:00 -0000
+
+

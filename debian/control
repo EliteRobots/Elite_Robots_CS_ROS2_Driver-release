@@ -1,0 +1,12 @@
+Source: ros-humble-elite-robots-msgs
+Section: misc
+Priority: optional
+Maintainer: "Ivan" <yanxiaojia@elibot.cn>
+Build-Depends: debhelper (>= 9.0.0), ros-humble-ament-cmake, ros-humble-ament-lint-auto <!nocheck>, ros-humble-ament-lint-common <!nocheck>, ros-humble-rosidl-default-generators, ros-humble-ros-workspace, ros-humble-rosidl-typesupport-fastrtps-c, ros-humble-rosidl-typesupport-fastrtps-cpp
+Homepage: https://index.ros.org/p/elite_robots_msgs/#humble
+Standards-Version: 3.9.2
+
+Package: ros-humble-elite-robots-msgs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-humble-rosidl-default-runtime, ros-humble-ros-workspace
+Description: Message and service definitions for interacting with Elite Robots robot controllers.

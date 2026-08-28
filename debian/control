@@ -1,0 +1,12 @@
+Source: ros-humble-elite-robots-calibration
+Section: misc
+Priority: optional
+Maintainer: "chenshichao" <chenshichao@elibot.cn>
+Build-Depends: debhelper (>= 9.0.0), libeigen3-dev, libyaml-cpp-dev, ros-humble-ament-cmake, ros-humble-ament-cmake-gmock <!nocheck>, ros-humble-ament-cmake-gtest <!nocheck>, ros-humble-ament-index-cpp, ros-humble-ament-lint-auto <!nocheck>, ros-humble-ament-lint-common <!nocheck>, ros-humble-elite-cs-series-sdk, ros-humble-rclcpp, ros-humble-ros-workspace
+Homepage: https://index.ros.org/p/elite_robots_calibration/#humble
+Standards-Version: 3.9.2
+
+Package: ros-humble-elite-robots-calibration
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libeigen3-dev, libyaml-cpp-dev, ros-humble-ament-index-cpp, ros-humble-elite-cs-series-sdk, ros-humble-launch, ros-humble-launch-ros, ros-humble-rclcpp, ros-humble-ros-workspace
+Description: Package for extracting the factory calibration from a CS robot and change it such that it can be used by elite_robots_description to gain a correct URDF

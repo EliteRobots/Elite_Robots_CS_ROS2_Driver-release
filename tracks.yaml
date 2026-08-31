@@ -23,8 +23,8 @@ tracks:
     patches: null
     release_inc: '1'
     release_repo_url: null
-    release_tag: humble-1.0.2
+    release_tag: humble-1.0.3
     ros_distro: humble
     vcs_type: git
     vcs_uri: https://github.com/EliteRobots/Elite_Robots_CS_ROS2_Driver.git
-    version: 1.0.2
+    version: 1.0.3

@@ -1,10 +1,55 @@
-# elite_robots_controllers
+[中文](./README_CN.md)
 
-This package contains controllers and hardware interface for `ros2_control` that are special to the Elite CS robot family. Currently this contains
+# Elite CS Robot Ros2 Driver
 
-  * A **speed_scaling_interface** to read the value of the current speed scaling into controllers.
-  * A **scaled_joint_command_interface** that provides access to joint values and commands in combination with the speed scaling value.
-  * A **speed_scaling_state_controller** that publishes the current execution speed as reported by the robot to a topic interface. Values are floating points between 0 and 1.
-  * A **scaled_joint_trajectory_controller** that is similar to the *joint_trajectory_controller*, but it uses the speed scaling reported by the robot to reduce progress in the trajectory.
+This driver is developed on top of `Elite_Robots_CS_SDK` and support some key cobot functionalities like: motion, set digital io. In addition the ExternalControl EliCOs makes it possible to include ROS2 behaviors in the robot program.
 
-For more details please see [doc/index.md](doc/index.md)
+## Requirements
+- Elite_Robots_CS_SDK
+- ROS2 - humble
+- Ubuntu22.04
+
+
+## Packages in the Repository
+- `elite_robots_msgs` - some common service or message interface.
+- `elite_robots_dashboard_msgs` - package defining messages used by dashboard node.
+- `elite_robots_controllers` - implementations of controllers specific for Elite CS robots.
+- `elite_robots_calibration` - tool for extracting calibration information from a real robot.
+- `elite_robots_driver` - driver / hardware interface for communication with Elite CS robots, including dashboard_client and primary_client service nodes.
+- `elite_robots_moveit_config` - example MoveIt configuration for Elite CS robots.
+
+## Getting Started
+For getting started, you'll basically need follow steps:
+1. Install the `elite-cs-series-sdk` from [source](https://github.com/Elite-Robots/Elite_Robots_CS_SDK).
+
+2. Ensure your ros environment. And recommended to run the following command to resolve the dependency issue:
+    ```bash
+    sudo apt update
+    rosdep install --ignore-src --rosdistro $ROS_DISTRO --from-paths src -y
+    ```
+3. **Compile driver**
+    ```bash
+    # create a workspace
+    mkdir -p elite_ros_ws/src
+    # move source code to worksapce
+    mv Elite_Robots_CS_ROS2_Driver  elite_ros_ws/src
+    cd elite_ros_ws
+    # compile
+    colcon build
+    ```
+4. **Install**
+    ```bash
+    . install/setup.bash
+    ```
+
+5. **Start the driver. See the [usage](elite_robots_driver/doc/Usage.md) documentation for details**
+    ```bash
+    ros2 launch elite_robots_driver elite_control.launch.py robot_ip:=<robot ip> local_ip:=<your pc ip> cs_type:=cs66
+    ```
+    If `cs_type` ends with `h` (5-axis), the launch automatically uses the 5-axis URDF and controller config.
+
+6. Unless started in [headless mode](doc/ROS2Interface.md#headless_mode): Run the task which contain ExternalControl node by pressing play on the teach pendant.
+
+> tips:
+> - If the compilation fails, you can check that the version of the dependency package matches. [dependency list](doc/DependencyList.md)
+> - If use real robot, ensure your robot FB1 and FB2 connected to network.

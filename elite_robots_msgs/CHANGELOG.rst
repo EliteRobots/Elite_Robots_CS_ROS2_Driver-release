@@ -2,6 +2,15 @@
 Changelog for package elite_robots_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2026-11-03)
+------------------
+* Synchronize the package version to 1.2.0 for the multi-arm launch and documentation release.
+
+1.1.0 (2026-09-04)
+------------------
+* Add service interfaces for collision detection, collision sensitivity, and mounting plane configuration.
+* Contributors: dukang123
+
 1.0.3 (2026-08-31)
 ------------------
 * Synchronize the package version for the repository-wide SDK CMake target integration fix.

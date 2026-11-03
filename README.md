@@ -19,37 +19,7 @@ This driver is developed on top of `Elite_Robots_CS_SDK` and support some key co
 - `elite_robots_moveit_config` - example MoveIt configuration for Elite CS robots.
 
 ## Getting Started
-For getting started, you'll basically need follow steps:
-1. Install the `elite-cs-series-sdk` from [source](https://github.com/Elite-Robots/Elite_Robots_CS_SDK).
 
-2. Ensure your ros environment. And recommended to run the following command to resolve the dependency issue:
-    ```bash
-    sudo apt update
-    rosdep install --ignore-src --rosdistro $ROS_DISTRO --from-paths src -y
-    ```
-3. **Compile driver**
-    ```bash
-    # create a workspace
-    mkdir -p elite_ros_ws/src
-    # move source code to worksapce
-    mv Elite_Robots_CS_ROS2_Driver  elite_ros_ws/src
-    cd elite_ros_ws
-    # compile
-    colcon build
-    ```
-4. **Install**
-    ```bash
-    . install/setup.bash
-    ```
+To get started, download the quick-start guide from the [Elite_Robots_CS_ROS2_Tutorials releases page](https://github.com/EliteRobots/Elite_Robots_CS_ROS2_Tutorials/releases) and follow its instructions to set up your environment, install the driver, and bring up the robot.
 
-5. **Start the driver. See the [usage](elite_robots_driver/doc/Usage.md) documentation for details**
-    ```bash
-    ros2 launch elite_robots_driver elite_control.launch.py robot_ip:=<robot ip> local_ip:=<your pc ip> cs_type:=cs66
-    ```
-    If `cs_type` ends with `h` (5-axis), the launch automatically uses the 5-axis URDF and controller config.
-
-6. Unless started in [headless mode](doc/ROS2Interface.md#headless_mode): Run the task which contain ExternalControl node by pressing play on the teach pendant.
-
-> tips:
-> - If the compilation fails, you can check that the version of the dependency package matches. [dependency list](doc/DependencyList.md)
-> - If use real robot, ensure your robot FB1 and FB2 connected to network.
+For details on driver launch parameters and usage, see the [driver usage documentation](elite_robots_driver/doc/Usage.md).

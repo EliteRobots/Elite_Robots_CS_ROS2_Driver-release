@@ -27,6 +27,7 @@ find_package(control_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(trajectory_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 set(
   THIS_PACKAGE_DEPENDENCIES
@@ -239,6 +240,14 @@ install(
 install(
   DIRECTORY example/config/
   DESTINATION share/${PROJECT_NAME}/config/
+)
+install(
+  DIRECTORY example/doc/
+  DESTINATION share/${PROJECT_NAME}/example/doc/
+)
+install(
+  DIRECTORY doc/
+  DESTINATION share/${PROJECT_NAME}/doc/
 )
 install(
   PROGRAMS example/python/example_safe_joint_move.py

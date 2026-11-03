@@ -34,6 +34,7 @@ def launch_setup(context, *args, **kwargs):
     launch_servo = LaunchConfiguration("launch_servo")
     publish_robot_description = LaunchConfiguration("publish_robot_description")
     publish_robot_description_semantic = LaunchConfiguration("publish_robot_description_semantic")
+    prefer_scaled_controller = LaunchConfiguration("prefer_scaled_controller")
 
     cs_type_value = cs_type.perform(context)
     is_5_axis = cs_type_value.endswith("h")
@@ -110,6 +111,9 @@ def launch_setup(context, *args, **kwargs):
             "prefix:=",
             prefix,
             " ",
+            "tf_prefix:=",
+            prefix,
+            " ",
         ]
     )
     robot_description = {"robot_description": robot_description_content}
@@ -135,8 +139,9 @@ def launch_setup(context, *args, **kwargs):
     )
     robot_description_semantic = {"robot_description_semantic": robot_description_semantic_content}
 
-    robot_description_kinematics = PathJoinSubstitution(
-        [FindPackageShare(moveit_config_package), "config", "kinematics.yaml"]
+    kinematics_file_value = LaunchConfiguration("kinematics_file").perform(context)
+    robot_description_kinematics = kinematics_file_value if os.path.isabs(kinematics_file_value) else PathJoinSubstitution(
+        [FindPackageShare(moveit_config_package), "config", kinematics_file_value]
     )
 
     robot_description_planning = {
@@ -158,15 +163,30 @@ def launch_setup(context, *args, **kwargs):
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
     # Trajectory Execution Configuration
-    controllers_yaml = load_yaml(
-        str(moveit_config_package.perform(context)),
-        os.path.join("config", moveit_controllers_file_value),
-    )
-    # the scaled_joint_trajectory_controller does not work on fake hardware
-    change_controllers = context.perform_substitution(use_fake_hardware)
-    if change_controllers == "true":
-        controllers_yaml["scaled_joint_trajectory_controller"]["default"] = False
-        controllers_yaml["joint_trajectory_controller"]["default"] = True
+    if os.path.isabs(moveit_controllers_file_value):
+        import yaml
+        with open(moveit_controllers_file_value, "r") as controller_file:
+            controllers_yaml = yaml.safe_load(controller_file)
+    else:
+        controllers_yaml = load_yaml(
+            str(moveit_config_package.perform(context)),
+            os.path.join("config", moveit_controllers_file_value),
+        )
+    # Preserve the historical single-arm fake behavior unless a composed
+    # multi-arm launch explicitly requests the scaled controller.  Also avoid
+    # indexing optional controller entries in user-provided YAML files.
+    scaled_controller = controllers_yaml.get("scaled_joint_trajectory_controller")
+    joint_controller = controllers_yaml.get("joint_trajectory_controller")
+    if prefer_scaled_controller.perform(context).lower() == "true":
+        if scaled_controller is not None:
+            scaled_controller["default"] = True
+        if joint_controller is not None:
+            joint_controller["default"] = False
+    elif use_fake_hardware.perform(context).lower() == "true":
+        if scaled_controller is not None:
+            scaled_controller["default"] = False
+        if joint_controller is not None:
+            joint_controller["default"] = True
 
     moveit_controllers = {
         "moveit_simple_controller_manager": controllers_yaml,
@@ -175,8 +195,8 @@ def launch_setup(context, *args, **kwargs):
 
     trajectory_execution = {
         "moveit_manage_controllers": False,
-        "trajectory_execution.allowed_execution_duration_scaling": 1.2,
-        "trajectory_execution.allowed_goal_duration_margin": 0.5,
+        "trajectory_execution.allowed_execution_duration_scaling": 10.0,
+        "trajectory_execution.allowed_goal_duration_margin": 20.0,
         "trajectory_execution.allowed_start_tolerance": 0.01,
     }
 
@@ -214,8 +234,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # rviz with moveit configuration
-    rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare(moveit_config_package), "rviz", "view_robot.rviz"]
+    rviz_config_file_value = LaunchConfiguration("rviz_config_file").perform(context)
+    rviz_config_file = rviz_config_file_value if os.path.isabs(rviz_config_file_value) else PathJoinSubstitution(
+        [FindPackageShare(moveit_config_package), "rviz", rviz_config_file_value]
     )
     rviz_node = Node(
         package="rviz2",
@@ -263,7 +284,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "cs_type",
             description="Type/series of used ELITE CS robot.",
-            choices=["cs63", "cs66", "cs68", "cs612", "cs616", "cs618f", "cs620", "cs625", "cs66a", "cs520h", "ls65"],
+            choices=["cs63", "cs63a", "cs66", "cs68", "cs612", "cs616", "cs618f", "cs620", "cs625", "cs630", "cs66a", "cs520h", "ls65"],
         )
     )
     declared_arguments.append(
@@ -366,8 +387,17 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument("launch_rviz", default_value="true", description="Launch RViz?")
     )
+    declared_arguments.append(DeclareLaunchArgument("rviz_config_file", default_value="view_robot.rviz"))
+    declared_arguments.append(DeclareLaunchArgument("kinematics_file", default_value="kinematics.yaml"))
     declared_arguments.append(
         DeclareLaunchArgument("launch_servo", default_value="true", description="Launch Servo?")
+    )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "prefer_scaled_controller",
+            default_value="false",
+            description="Prefer scaled_joint_trajectory_controller when available.",
+        )
     )
     declared_arguments.append(
         DeclareLaunchArgument(

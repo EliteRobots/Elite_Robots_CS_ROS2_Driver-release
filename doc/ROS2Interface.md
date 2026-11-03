@@ -125,6 +125,12 @@ Restart robot safety system.
 #### *custom_request*[(elite_robots_dashboard_msgs/srv/CustomRequest)](/elite_robots_dashboard_msgs/srv/CustomRequest.srv)
 Send custom request and receive robot response
 
+#### *set_remote_control*[(elite_robots_dashboard_msgs/srv/SetRemoteControl)](/elite_robots_dashboard_msgs/srv/SetRemoteControl.srv)
+Enable or disable robot remote control mode.
+
+#### *get_remote_control_mode*[(elite_robots_dashboard_msgs/srv/GetRemoteControlMode)](/elite_robots_dashboard_msgs/srv/GetRemoteControlMode.srv)
+Get the current remote control mode. The response can be `UNKNOWN`, `NONE`, `LOCAL`, or `REMOTE`.
+
 ## primary_client
 
 ### Services
@@ -193,3 +199,11 @@ Set robot payload.
 #### *zero_ftsensor*[(std_srvs/srv/Trigger)](https://docs.ros.org/en/api/std_srvs/html/srv/Trigger.html)
 Zero the ft sensor.
 
+#### *set_collision_detect_enabled*[(elite_robots_msgs/srv/SetCollisionDetectEnabled)](/elite_robots_msgs/srv/SetCollisionDetectEnabled.srv)
+Enable or disable collision detection.
+
+#### *set_collision_sensitivity*[(elite_robots_msgs/srv/SetCollisionSensitivity)](/elite_robots_msgs/srv/SetCollisionSensitivity.srv)
+Set the collision sensitivity percentage, valid range `[10, 100]`.
+
+#### *set_mounting_plane*[(elite_robots_msgs/srv/SetMountingPlane)](/elite_robots_msgs/srv/SetMountingPlane.srv)
+Set the robot mounting plane. `z_rotation` and `tilt` are both in radians.

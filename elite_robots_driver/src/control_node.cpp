@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <sys/resource.h>
 #include <algorithm>
 #include <chrono>
 #include <memory>
@@ -47,7 +48,25 @@ int main(int argc, char ** argv)
     }
   }
   const bool has_realtime = realtime_tools::has_realtime_kernel();
-  const bool lock_memory = cm->get_parameter_or<bool>("lock_memory", has_realtime);
+  // MCL_FUTURE also locks memory allocated while loading hardware and controllers.
+  // With a finite memlock limit, locking can succeed here but later allocations or
+  // publisher threads can fail. Only enable it automatically with unlimited memlock.
+  bool lock_memory = false;
+  if (!cm->get_parameter("lock_memory", lock_memory) && has_realtime)
+  {
+    struct rlimit memlock_limit {};
+    lock_memory =
+      getrlimit(RLIMIT_MEMLOCK, &memlock_limit) == 0 && memlock_limit.rlim_cur == RLIM_INFINITY;
+    if (!lock_memory)
+    {
+      RCLCPP_WARN(
+        cm->get_logger(),
+        "Automatic memory locking disabled: the process does not have an unlimited memlock "
+        "allowance. A finite allowance can prevent hardware and controller threads from starting. "
+        "Configure unlimited memlock for automatic locking, or set lock_memory explicitly after "
+        "sizing the allowance for all controllers.");
+    }
+  }
   if (lock_memory)
   {
     const auto lock_result = realtime_tools::lock_memory();

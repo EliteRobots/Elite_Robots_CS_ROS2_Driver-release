@@ -126,6 +126,12 @@ p {
 #### *custom_request*[(elite_robots_dashboard_msgs/srv/CustomRequest)](/elite_robots_dashboard_msgs/srv/CustomRequest.srv)
 发送自定义指令并且接收回复。
 
+#### *set_remote_control*[(elite_robots_dashboard_msgs/srv/SetRemoteControl)](/elite_robots_dashboard_msgs/srv/SetRemoteControl.srv)
+打开或关闭机器人远程控制模式。
+
+#### *get_remote_control_mode*[(elite_robots_dashboard_msgs/srv/GetRemoteControlMode)](/elite_robots_dashboard_msgs/srv/GetRemoteControlMode.srv)
+获取当前远程控制模式。返回值包含 `UNKNOWN`、`NONE`、`LOCAL` 和 `REMOTE`。
+
 ## primary_client
 
 ### 服务
@@ -193,3 +199,12 @@ p {
 
 #### *zero_ftsensor*[(std_srvs/srv/Trigger)](https://docs.ros.org/en/api/std_srvs/html/srv/Trigger.html)
 归零 ft 传感器。
+
+#### *set_collision_detect_enabled*[(elite_robots_msgs/srv/SetCollisionDetectEnabled)](/elite_robots_msgs/srv/SetCollisionDetectEnabled.srv)
+打开或关闭碰撞检测。
+
+#### *set_collision_sensitivity*[(elite_robots_msgs/srv/SetCollisionSensitivity)](/elite_robots_msgs/srv/SetCollisionSensitivity.srv)
+设置碰撞灵敏度百分比，取值范围为 `[10, 100]`。
+
+#### *set_mounting_plane*[(elite_robots_msgs/srv/SetMountingPlane)](/elite_robots_msgs/srv/SetMountingPlane.srv)
+设置机器人安装平面。`z_rotation` 和 `tilt` 的单位均为弧度。

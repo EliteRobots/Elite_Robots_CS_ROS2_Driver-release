@@ -18,6 +18,19 @@
 
 该驱动程序使用ROS-Control进行所有控制语句。因此，它可以与ROS-Control中所有基于位置的控制器一起使用。然而，我们推荐使用来自elite_robots_controllers包中的控制器。有关详细信息，请参见 [该包文档](../elite_robots_controllers/README_CN.md)。注意：只有使用elite_robots_controllers中的控制器，才能获得速度缩放支持。
 
+## 实时内存锁定
+
+`eli_ros2_control_node` 仅在检测到实时内核，且进程的软 `memlock` 上限为无限
+（`ulimit -l` 输出 `unlimited`）时自动锁定内存。有限额度可能足以完成启动时的锁定，
+但硬件或控制器发布器随后创建线程时仍可能耗尽额度，出现
+`Resource temporarily unavailable`，导致广播器停留在未配置状态。
+
+控制器 YAML 中的 `controller_manager.ros__parameters.lock_memory` 参数可覆盖该默认行为。
+设置为 `false` 可关闭内存锁定；仅在锁定额度足以容纳全部硬件和控制器时显式设置为 `true`。
+实时调度权限与内存锁定额度相互独立：启用 FIFO 调度时出现 `Operation not permitted`，
+表示 `rtprio` 额度不足。配置方法见
+[Humble controller manager 文档](https://control.ros.org/humble/doc/ros2_control/controller_manager/doc/userdoc.html#determinism)。
+
 ## 关于模式的说明
 
 在本驱动程序中，"模式" 一词有不同的含义。

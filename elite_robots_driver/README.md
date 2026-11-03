@@ -17,6 +17,21 @@
 
 &emsp;&emsp;This driver is using ROS-Control for any control statements. Therefore, it can be used with all position-based controllers available in ROS-Control. However, we recommend using the controllers from the elite_robots_controllers package. See it's [documentation](../elite_robots_controllers/README.md) for details. Note: Speed scaling support will only be available using the controllers from elite_robots_controllers.
 
+## Real-time memory locking
+
+`eli_ros2_control_node` automatically locks memory only when a real-time kernel is
+detected and the process has an unlimited soft `memlock` allowance (`ulimit -l`).
+With a finite allowance, locking can succeed at startup but exhaust the allowance
+when hardware or controller publishers create more threads. This can cause
+`Resource temporarily unavailable` and leave a broadcaster unconfigured.
+
+The `controller_manager.ros__parameters.lock_memory` parameter in the controllers
+YAML overrides this default. Set it to `false` to disable locking, or to `true`
+only after allowing enough locked memory for all hardware and controllers.
+Real-time scheduling permissions are separate: `Operation not permitted` when
+enabling FIFO scheduling indicates an insufficient `rtprio` allowance. See the
+[Humble controller manager setup](https://control.ros.org/humble/doc/ros2_control/controller_manager/doc/userdoc.html#determinism).
+
 ## A note about modes
 
 The term mode is used in different meanings inside this driver.

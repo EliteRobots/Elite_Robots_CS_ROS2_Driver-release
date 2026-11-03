@@ -8,6 +8,9 @@
 #include "elite_robots_msgs/srv/set_io.hpp"
 #include "elite_robots_msgs/srv/set_speed_slider_fraction.hpp"
 #include "elite_robots_msgs/srv/set_payload.hpp"
+#include "elite_robots_msgs/srv/set_collision_detect_enabled.hpp"
+#include "elite_robots_msgs/srv/set_collision_sensitivity.hpp"
+#include "elite_robots_msgs/srv/set_mounting_plane.hpp"
 
 #include <memory>
 #include <string>
@@ -102,7 +105,14 @@ private:
         ZERO_FTSENSOR,
         ZERO_FTSENSOR_SUCCESS,
         HAND_BACK_CONTROL,
-        HAND_BACK_CONTROL_SUCCESS
+        HAND_BACK_CONTROL_SUCCESS,
+        COLLISION_DETECT_ENABLED,
+        COLLISION_DETECT_ENABLED_SUCCESS,
+        COLLISION_SENSITIVITY,
+        COLLISION_SENSITIVITY_SUCCESS,
+        MOUNTING_Z_ROTATION,
+        MOUNTING_TILT,
+        MOUNTING_PLANE_SUCCESS
     };
 
     bool setIO(elite_robots_msgs::srv::SetIO::Request::SharedPtr req, elite_robots_msgs::srv::SetIO::Response::SharedPtr resp);
@@ -117,6 +127,15 @@ private:
     bool setPayload(const elite_robots_msgs::srv::SetPayload::Request::SharedPtr req, elite_robots_msgs::srv::SetPayload::Response::SharedPtr resp);
 
     bool zeroFTSensor(std_srvs::srv::Trigger::Request::SharedPtr req, std_srvs::srv::Trigger::Response::SharedPtr resp);
+
+    bool setCollisionDetectEnabled(const elite_robots_msgs::srv::SetCollisionDetectEnabled::Request::SharedPtr req,
+                                   elite_robots_msgs::srv::SetCollisionDetectEnabled::Response::SharedPtr resp);
+
+    bool setCollisionSensitivity(const elite_robots_msgs::srv::SetCollisionSensitivity::Request::SharedPtr req,
+                                 elite_robots_msgs::srv::SetCollisionSensitivity::Response::SharedPtr resp);
+
+    bool setMountingPlane(const elite_robots_msgs::srv::SetMountingPlane::Request::SharedPtr req,
+                          elite_robots_msgs::srv::SetMountingPlane::Response::SharedPtr resp);
 
     void publishIO();
 
@@ -140,6 +159,9 @@ private:
     rclcpp::Service<elite_robots_msgs::srv::SetIO>::SharedPtr set_io_srv_;
     rclcpp::Service<elite_robots_msgs::srv::SetPayload>::SharedPtr set_payload_srv_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr tare_sensor_srv_;
+    rclcpp::Service<elite_robots_msgs::srv::SetCollisionDetectEnabled>::SharedPtr set_collision_detect_enabled_srv_;
+    rclcpp::Service<elite_robots_msgs::srv::SetCollisionSensitivity>::SharedPtr set_collision_sensitivity_srv_;
+    rclcpp::Service<elite_robots_msgs::srv::SetMountingPlane>::SharedPtr set_mounting_plane_srv_;
 
     std::shared_ptr<rclcpp::Publisher<elite_robots_msgs::msg::IOState>> io_pub_;
     std::shared_ptr<rclcpp::Publisher<elite_robots_msgs::msg::ToolData>> tool_data_pub_;

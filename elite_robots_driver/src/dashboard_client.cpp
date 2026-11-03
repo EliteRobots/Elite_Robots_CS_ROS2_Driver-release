@@ -19,6 +19,21 @@ int8_t toRosTaskStatus(const ELITE::TaskStatus sdk_status) {
             return elite_robots_msgs::msg::TaskStatus::UNKNOWN;
     }
 }
+
+int8_t toRosRemoteControlMode(const ELITE::RemoteControlMode sdk_mode) {
+    using Response = elite_robots_dashboard_msgs::srv::GetRemoteControlMode::Response;
+    switch (sdk_mode) {
+        case ELITE::RemoteControlMode::REMOTE:
+            return Response::REMOTE;
+        case ELITE::RemoteControlMode::LOCAL:
+            return Response::LOCAL;
+        case ELITE::RemoteControlMode::NONE:
+            return Response::NONE;
+        case ELITE::RemoteControlMode::UNKNOWN:
+        default:
+            return Response::UNKNOWN;
+    }
+}
 }  // namespace
 
 DashboardClient::DashboardClient(const rclcpp::NodeOptions& options) : Node("dashboard_client", options) {
@@ -53,6 +68,33 @@ DashboardClient::DashboardClient(const rclcpp::NodeOptions& options) : Node("das
     quit_service_ = createTriggerService("~/quit", [&]()->bool{ client_.quit(); return true; });
 
     safety_system_restart_service_ = createTriggerService("~/restart_safety", [&]()->bool{ return client_.safetySystemRestart(); });
+
+    set_remote_control_service_ = this->create_service<elite_robots_dashboard_msgs::srv::SetRemoteControl>(
+        "~/set_remote_control",
+        [&](const elite_robots_dashboard_msgs::srv::SetRemoteControl::Request::SharedPtr req,
+            elite_robots_dashboard_msgs::srv::SetRemoteControl::Response::SharedPtr resp) {
+            try {
+                resp->success = client_.remoteControl(req->enable);
+            } catch (const ELITE::EliteException& e) {
+                resp->success = false;
+                resp->message = e.what();
+            }
+        });
+
+    get_remote_control_mode_service_ = this->create_service<elite_robots_dashboard_msgs::srv::GetRemoteControlMode>(
+        "~/get_remote_control_mode",
+        [&](const elite_robots_dashboard_msgs::srv::GetRemoteControlMode::Request::SharedPtr req,
+            elite_robots_dashboard_msgs::srv::GetRemoteControlMode::Response::SharedPtr resp) {
+            (void)req;
+            try {
+                resp->mode = toRosRemoteControlMode(client_.remoteControlMode());
+                resp->success = true;
+            } catch (const ELITE::EliteException& e) {
+                resp->mode = elite_robots_dashboard_msgs::srv::GetRemoteControlMode::Response::UNKNOWN;
+                resp->success = false;
+                resp->message = e.what();
+            }
+        });
 
     popup_service_ = this->create_service<elite_robots_dashboard_msgs::srv::Popup>(
         "~/popup",

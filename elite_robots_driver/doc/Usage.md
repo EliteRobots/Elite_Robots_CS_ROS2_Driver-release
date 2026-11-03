@@ -5,7 +5,7 @@ For starting the driver there are a main launch files in the `elite_robots_drive
 - elite_control.launch.py - starts [ros2_control](https://control.ros.org/humble/index.html) node including hardware interface, joint state broadcaster and a controller. This launch file also starts dashboard_client and primary_client if real robot is used.
 
 The arguments for launch files can be listed using `ros2 launch elite_robots_driver elite_control.launch.py --show-args`. The most relevant arguments are the following:
-- `cs_type` (mandatory) - a type of used Elite CS robot (`cs63`, `cs66`, `cs66a`, `cs68`, `cs612`, `cs616`, `cs618f`, `cs620`, `cs625`, `cs520h`, `ls65`). If the type ends with `h` (5-axis), the launch automatically uses the 5-axis URDF and controller configuration.
+- `cs_type` (mandatory) - a type of used Elite CS robot (`cs63`, `cs63a`, `cs66`, `cs66a`, `cs68`, `cs612`, `cs616`, `cs618f`, `cs620`, `cs625`, `cs630`, `cs520h`, `ls65`). If the type ends with `h` (5-axis), the launch automatically uses the 5-axis URDF and controller configuration.
 - `robot_ip` (mandatory) - the used robot ip which the root can be reached.
 - `local_ip` (mandatory) - the external controller ip address which robot can readched.
 - `use_fake_hardware` (default: false ) - use simple hardware emulator from [ros2_control](https://control.ros.org/humble/index.html). Useful for testing launch files, descriptions, etc. See explanation below.
@@ -20,7 +20,7 @@ The arguments for launch files can be listed using `ros2 launch elite_robots_dri
 
 ## Example Commands for Testing the Driver
 
-Allowed CS robots - Type strings: `cs63`, `cs66`, `cs66a`, `cs68`, `cs612`, `cs616`, `cs618f`, `cs620`, `cs625`, `cs520h`, `ls65`
+Allowed CS robots - Type strings: `cs63`, `cs63a`, `cs66`, `cs66a`, `cs68`, `cs612`, `cs616`, `cs618f`, `cs620`, `cs625`, `cs630`, `cs520h`, `ls65`
 
 > ***NOTE:***  
 > **These tests is a very basic. Look at the code and make sure that the robot is able to perform the motions safely before running this on a real robot!**
@@ -39,6 +39,17 @@ After starting the launch file start the ExternalControl EliCOs task from the pe
 - To use fake hardware, use the `use_fake_hardware` argument, like:
 ```bash
 ros2 launch elite_robots_driver elite_control.launch.py robot_ip:=xxx.xxx.xxx.xxx local_ip:=yyy.yyy.yyy.yyy cs_type:=zzzz use_fake_hardware:=true
+```
+
+- Multi-arm control system:
+
+To implement a multi-arm control system, refer to the multi-arm composition
+document below. It provides complete `dual_arm_control.launch.py` and
+`dual_moveit.launch.py` examples, parameter configuration, and startup
+instructions:
+
+```text
+elite_robots_driver/doc/MultiArm.md
 ```
 
 ### 2. Sending commands to controllers

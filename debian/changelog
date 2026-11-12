@@ -1,0 +1,53 @@
+ros-jazzy-elite-robots-driver (1.2.0-1noble) noble; urgency=high
+
+  * Enable automatic memory locking only on real-time kernels with an unlimited soft memlock allowance; preserve explicit ``lock_memory`` overrides to avoid startup failures under finite limits.
+  * Stop controller-manager statistics publisher threads before ROS context shutdown and declare the direct ``pal_statistics`` dependency.
+  * Document memory-locking and scheduling permissions and extend integration coverage for finite memory limits, controller states, and clean shutdown.
+  * Use the unscaled trajectory controller and leave IO inactive for single-arm fake hardware as well.
+  * Add Primary-port robot control services and skip the dashboard component when its connection fails.
+  * Add configurable controller-manager targets and optional controller spawning for multi-arm launch composition.
+  * Accept absolute controller configuration paths and qualify update-rate parameters for namespaced controller managers.
+  * Add bilingual multi-arm driver and MoveIt setup guides, link them from the usage guides, and install the documentation with the package.
+  * Use the unscaled trajectory controller for dual-arm fake hardware and keep mock IO inactive.
+  * Add dashboard services for setting and querying remote control mode.
+  * Add runtime collision detection, collision sensitivity, and mounting plane configuration.
+  * Improve trajectory feedback, cancellation handling, and servo command extrapolation.
+  * Add CS63A and CS630 launch support and bilingual example documentation.
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Mon, 02 Nov 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-driver (1.0.3-1noble) noble; urgency=high
+
+  * Link SDK consumers against the exported ``elite-cs-series-sdk::shared`` CMake target.
+  * Propagate SDK usage requirements through exported driver components.
+  * Contributors: Yan
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Sun, 30 Aug 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-driver (1.0.2-1noble) noble; urgency=high
+
+  * Use the SDK ROS package metadata without a version constraint.
+  * Standardize the package maintainer metadata.
+  * Contributors: Yan
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Thu, 27 Aug 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-driver (1.0.1-1noble) noble; urgency=high
+
+  * Declare the Elite CS Series SDK dependency.
+  * Declare geometry messages, standard messages, realtime tools, and example runtime dependencies explicitly.
+  * Contributors: Ivan
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Sun, 23 Aug 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-driver (1.0.0-1noble) noble; urgency=high
+
+  * First public release of the Elite Robots CS ROS 2 driver.
+  * Added ros2_control hardware, dashboard, primary, and reverse interfaces.
+  * Added launch files and controller configurations for Elite CS robots.
+  * Renamed the package to ``elite_robots_driver``.
+  * Contributors: Yan
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Tue, 28 Jul 2026 16:00:00 -0000
+
+

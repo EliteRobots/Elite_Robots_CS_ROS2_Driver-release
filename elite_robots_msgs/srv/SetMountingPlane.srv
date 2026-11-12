@@ -1,5 +1,0 @@
-# Angles are in radians.
-float64 z_rotation
-float64 tilt
----
-bool success

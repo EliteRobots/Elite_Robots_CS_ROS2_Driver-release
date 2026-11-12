@@ -22,6 +22,7 @@ find_package(controller_manager_msgs REQUIRED)
 find_package(backward_ros REQUIRED)
 find_package(elite-cs-series-sdk REQUIRED)
 find_package(realtime_tools REQUIRED)
+find_package(pal_statistics REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -208,6 +209,8 @@ add_executable(
 ament_target_dependencies(
   eli_ros2_control_node
   controller_manager
+  hardware_interface
+  pal_statistics
   rclcpp
   realtime_tools
 )

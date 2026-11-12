@@ -14,7 +14,7 @@ controller_manager:
 
     forward_velocity_controller:
       type: velocity_controllers/JointGroupVelocityController
-    
+
     io_and_status_controller:
       type: elite_robots_controllers/GPIOController
 
@@ -23,7 +23,7 @@ controller_manager:
 
     scaled_joint_trajectory_controller:
       type: elite_robots_controllers/ScaledJointTrajectoryController
-    
+
     freedrive_controller:
       type: elite_robots_controllers/FreedriveController
 

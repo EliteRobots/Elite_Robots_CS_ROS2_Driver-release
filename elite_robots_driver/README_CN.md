@@ -29,7 +29,7 @@
 设置为 `false` 可关闭内存锁定；仅在锁定额度足以容纳全部硬件和控制器时显式设置为 `true`。
 实时调度权限与内存锁定额度相互独立：启用 FIFO 调度时出现 `Operation not permitted`，
 表示 `rtprio` 额度不足。配置方法见
-[Humble controller manager 文档](https://control.ros.org/humble/doc/ros2_control/controller_manager/doc/userdoc.html#determinism)。
+[Jazzy controller manager 文档](https://control.ros.org/jazzy/doc/ros2_control/controller_manager/doc/userdoc.html#determinism)。
 
 ## 关于模式的说明
 

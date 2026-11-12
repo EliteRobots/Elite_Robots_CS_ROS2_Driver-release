@@ -138,8 +138,11 @@ def arm_group(
         ]
     )
 
+    fake_hardware = use_fake_hardware.lower() == "true"
     spawner_nodes = []
     for controller_name in CONTROLLERS:
+        if fake_hardware and controller_name == "scaled_joint_trajectory_controller":
+            controller_name = "joint_trajectory_controller"
         arguments = [
             controller_name,
             "--controller-manager",
@@ -147,7 +150,9 @@ def arm_group(
             "--controller-manager-timeout",
             spawner_timeout,
         ]
-        if controller_name in ("forward_position_controller", "freedrive_controller"):
+        if controller_name in ("forward_position_controller", "freedrive_controller") or (
+            fake_hardware and controller_name == "io_and_status_controller"
+        ):
             arguments.append("--inactive")
         spawner_nodes.append(
             Node(
@@ -208,6 +213,7 @@ def arm_group(
 def setup_arms(context, *args, **kwargs):
     arm1_cs_type = LaunchConfiguration("arm1_cs_type").perform(context)
     arm2_cs_type = LaunchConfiguration("arm2_cs_type").perform(context)
+    use_fake_hardware = LaunchConfiguration("use_fake_hardware").perform(context)
     return [
         arm_group(
             "arm1", "arm1_", LaunchConfiguration("arm1_ip"),
@@ -218,7 +224,7 @@ def setup_arms(context, *args, **kwargs):
                 LaunchConfiguration("arm1_script_command_port"),
             ),
             arm1_cs_type,
-            LaunchConfiguration("use_fake_hardware"),
+            use_fake_hardware,
             LaunchConfiguration("headless_mode"),
             LaunchConfiguration("controller_spawner_timeout"),
         ),
@@ -231,7 +237,7 @@ def setup_arms(context, *args, **kwargs):
                 LaunchConfiguration("arm2_script_command_port"),
             ),
             arm2_cs_type,
-            LaunchConfiguration("use_fake_hardware"),
+            use_fake_hardware,
             LaunchConfiguration("headless_mode"),
             LaunchConfiguration("controller_spawner_timeout"),
         ),
@@ -292,17 +298,18 @@ launch arguments; no Python-file edits are required.
 For five-axis models such as `cs520h`, the template automatically selects the
 five-axis controller configuration and joint list for that arm.
 
-Note: fake hardware mock interfaces do not provide GPIO command interfaces, so
-`io_and_status_controller` may be shown as `inactive` during fake tests. This
-is a known fake-hardware limitation, not a dual-arm namespace or trajectory
-controller failure. On real hardware, this controller should activate when the
-corresponding interfaces are available.
+Fake hardware uses `joint_trajectory_controller` because it does not provide
+valid speed-scaling feedback for `scaled_joint_trajectory_controller`. The
+MoveIt example selects the same controller. `io_and_status_controller` stays
+`inactive` because the mock hardware lacks the runtime configuration command
+interfaces. Real hardware uses the scaled trajectory controller and activates
+the IO controller.
 
 ## 3. Build and start
 
 ```bash
 cd ~/elite_ros_ws
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 colcon build --packages-up-to elite_robots_driver elite_robots_moveit_config
 source install/setup.bash
 ```
@@ -492,7 +499,7 @@ def arm_moveit(namespace, prefix, cs_type, use_fake_hardware, launch_rviz):
                 "moveit_controllers_file": make_controller_file(prefix, cs_type),
                 "kinematics_file": make_kinematics_file(group),
                 "rviz_config_file": make_rviz_file(group, namespace),
-                "prefer_scaled_controller": "true",
+                "prefer_scaled_controller": "false" if use_fake_hardware.lower() == "true" else "true",
             }.items(),
         ),
     ])
@@ -501,15 +508,16 @@ def arm_moveit(namespace, prefix, cs_type, use_fake_hardware, launch_rviz):
 def setup_arms(context, *args, **kwargs):
     arm1_cs_type = LaunchConfiguration("arm1_cs_type").perform(context)
     arm2_cs_type = LaunchConfiguration("arm2_cs_type").perform(context)
+    use_fake_hardware = LaunchConfiguration("use_fake_hardware").perform(context)
     return [
         arm_moveit(
             "arm1", "arm1_", arm1_cs_type,
-            LaunchConfiguration("use_fake_hardware"),
+            use_fake_hardware,
             LaunchConfiguration("launch_rviz"),
         ),
         arm_moveit(
             "arm2", "arm2_", arm2_cs_type,
-            LaunchConfiguration("use_fake_hardware"),
+            use_fake_hardware,
             LaunchConfiguration("launch_rviz"),
         ),
     ]

@@ -66,6 +66,10 @@ def launch_setup(context, *args, **kwargs):
     spawn_controllers = LaunchConfiguration("spawn_controllers")
 
     cs_type_value = cs_type.perform(context)
+    fake_hardware = use_fake_hardware.perform(context).lower() == "true"
+    # GenericSystem does not simulate the robot's speed scaling or IO handshake.
+    if fake_hardware and initial_joint_controller.perform(context) == "scaled_joint_trajectory_controller":
+        initial_joint_controller = "joint_trajectory_controller"
     is_5_axis = cs_type_value.endswith("h")
     controllers_file_value = controllers_file.perform(context)
     description_file_value = description_file.perform(context)
@@ -296,6 +300,9 @@ def launch_setup(context, *args, **kwargs):
         "tcp_pose_broadcaster",
     ]
     controller_spawner_inactive_names = ["forward_position_controller", "freedrive_controller"]
+    if fake_hardware:
+        controller_spawner_names.remove("io_and_status_controller")
+        controller_spawner_inactive_names.append("io_and_status_controller")
 
     controller_spawners = [controller_spawner(name) for name in controller_spawner_names] + [
         controller_spawner(name, active=False) for name in controller_spawner_inactive_names
@@ -332,7 +339,7 @@ def launch_setup(context, *args, **kwargs):
     )
     
 
-    # Start the joint controller after the broadcaster requests have settled.
+    # Preserve each spawner's activation condition inside the optional group.
     initial_joint_controller_spawner_started = initial_joint_controller_spawner_started_node
     initial_joint_controller_spawner_stopped = initial_joint_controller_spawner_stopped_node
 
@@ -472,7 +479,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "initial_joint_controller",
             default_value="scaled_joint_trajectory_controller",
-            description="Initially loaded robot controller.",
+            description="Initially loaded robot controller. Fake hardware uses joint_trajectory_controller instead of scaled_joint_trajectory_controller.",
         )
     )
     declared_arguments.append(

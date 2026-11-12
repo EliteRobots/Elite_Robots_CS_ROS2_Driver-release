@@ -16,7 +16,6 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 // ros2_control hardware_interface
-#include <hardware_interface/visibility_control.h>
 #include <hardware_interface/hardware_info.hpp>
 #include <hardware_interface/system_interface.hpp>
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
@@ -55,7 +54,8 @@ class EliteCSPositionHardwareInterface : public hardware_interface::SystemInterf
     RCLCPP_SHARED_PTR_DEFINITIONS(EliteCSPositionHardwareInterface)
     virtual ~EliteCSPositionHardwareInterface();
 
-    hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo& system_info) final;
+    hardware_interface::CallbackReturn on_init(
+        const hardware_interface::HardwareComponentInterfaceParams& params) final;
 
     std::vector<hardware_interface::StateInterface> export_state_interfaces() final;
 

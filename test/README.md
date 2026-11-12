@@ -1,52 +1,23 @@
-# Humble memory-locking regression
+# Jazzy integration checks
 
-Build the workspace, source its `install/setup.bash`, and install `python3-pytest`
-and `ros-humble-joint-state-broadcaster`. From this repository, run:
-
-```bash
-python3 -m pytest test/test_memory_locking.py -v
-```
-
-The six cases start `eli_ros2_control_node` with virtual hardware, load and
-activate a joint state broadcaster, inspect `/proc/<pid>/status` for locked
-memory, and check clean shutdown. They cover automatic locking and explicit
-`lock_memory` overrides with finite and unlimited soft limits. No robot connection
-is made. Tests use loopback discovery and ROS domain 181; set
-`ELITE_TEST_DOMAIN_ID` to another unused domain if needed. Run them sequentially.
-
-Full coverage requires a real-time kernel and an unlimited **hard** memlock
-allowance. Cases that require a higher allowance than the test process can set
-are skipped. The tests change only their child processes' soft limits. In an
-isolated Docker container on a real-time host, use `--ulimit memlock=-1` and run
-the tests as an ordinary user without `CAP_IPC_LOCK`. On a non-real-time kernel,
-the automatic cases instead verify that locking stays disabled.
-
-`ELITE_CONTROL_NODE=/absolute/path/to/eli_ros2_control_node` selects a different
-compiled executable, for example to demonstrate that the original Humble node
-fails the automatic/finite case:
+Build the Driver and Description repositories together with a compatible Elite CS
+SDK, then source `/opt/ros/jazzy/setup.bash` and the workspace's `install/setup.bash`.
+From this repository, run:
 
 ```bash
-ELITE_CONTROL_NODE=/absolute/path/to/original_node \
-  python3 -m pytest test/test_memory_locking.py -v -k 'auto and finite'
+ROS_DOMAIN_ID=176 ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST \
+  python3 -m pytest -v test/test_jazzy_integration.py
 ```
 
-## Validation on 2026-11-02
+These opt-in tests do not connect to a robot. They check the custom control node's
+startup with finite `memlock` (automatic locking and explicit `lock_memory=false`)
+and clean SIGINT shutdown, including the statistics publisher threads.
+The remaining tests use `mock_components/GenericSystem` and exercise CS63A, CS630,
+and five-axis CS520H activation of all expected controllers and broadcasters,
+trajectory action execution, and MoveIt planning with time parameterization.
+The dual-arm check runs the launch example from `elite_robots_driver/doc/MultiArm.md`
+and verifies separate controller managers and prefixed joint interfaces.
+Pytest's temporary directory retains launch logs for diagnosis.
 
-Validated in an Ubuntu 22.04.5 / ROS Humble container on kernel
-`6.8.1-1039-realtime`, using controller_manager 2.54.3, realtime_tools 2.15.1,
-and joint_state_broadcaster 2.54.1. The test user had UID 1000, no effective
-capabilities, and `rtprio=0`; the container supplied an unlimited hard memlock
-allowance. The finite cases used a 2 GiB soft limit.
-
-The driver, controllers, description, SDK, and two message packages all built
-successfully with `colcon build --packages-up-to elite_robots_driver
-elite_robots_controllers`. All six runtime cases passed, including broadcaster
-activation and clean shutdown with no ERROR logs.
-
-The original node from `humble` commit `f36c671` failed the automatic/finite
-regression: its `VmLck` was 1,257,812 KiB instead of zero. The fixed node reported
-zero for that case and both explicit-disable cases, and nonzero locked memory
-for automatic/unlimited and both explicit-enable cases. This comparison verifies
-the locking policy; it does not claim that the small virtual robot reproduces
-the original controller-allocation failure. FIFO permission warnings remained
-expected with `rtprio=0`.
+The Description repository's `colcon test --packages-select elite_robots_description`
+also checks all thirteen models with and without a TF prefix, including mesh paths.

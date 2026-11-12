@@ -4,12 +4,7 @@ Changelog for package elite_robots_calibration
 
 1.2.0 (2026-11-03)
 ------------------
-* Synchronize the package version to 1.2.0 for the multi-arm launch and documentation release.
-
-1.1.0 (2026-09-04)
-------------------
-* Synchronize the package version for the repository-wide feature release.
-* Contributors: dukang123, Yan
+* Synchronize the package version to 1.2.0 for the Jazzy feature parity release.
 
 1.0.3 (2026-08-31)
 ------------------
@@ -26,7 +21,7 @@ Changelog for package elite_robots_calibration
 1.0.1 (2026-08-24)
 ------------------
 * Declare the Elite CS Series SDK dependency required by the calibration tool.
-* Declare the ament index and launch dependencies used by the package.
+* Declare the launch dependencies used by the package.
 * Contributors: Ivan
 
 1.0.0 (2026-07-29)

@@ -134,8 +134,11 @@ def arm_group(
         ]
     )
 
+    fake_hardware = use_fake_hardware.lower() == "true"
     spawner_nodes = []
     for controller_name in CONTROLLERS:
+        if fake_hardware and controller_name == "scaled_joint_trajectory_controller":
+            controller_name = "joint_trajectory_controller"
         arguments = [
             controller_name,
             "--controller-manager",
@@ -143,7 +146,9 @@ def arm_group(
             "--controller-manager-timeout",
             spawner_timeout,
         ]
-        if controller_name in ("forward_position_controller", "freedrive_controller"):
+        if controller_name in ("forward_position_controller", "freedrive_controller") or (
+            fake_hardware and controller_name == "io_and_status_controller"
+        ):
             arguments.append("--inactive")
         spawner_nodes.append(
             Node(
@@ -204,6 +209,7 @@ def arm_group(
 def setup_arms(context, *args, **kwargs):
     arm1_cs_type = LaunchConfiguration("arm1_cs_type").perform(context)
     arm2_cs_type = LaunchConfiguration("arm2_cs_type").perform(context)
+    use_fake_hardware = LaunchConfiguration("use_fake_hardware").perform(context)
     return [
         arm_group(
             "arm1", "arm1_", LaunchConfiguration("arm1_ip"),
@@ -214,7 +220,7 @@ def setup_arms(context, *args, **kwargs):
                 LaunchConfiguration("arm1_script_command_port"),
             ),
             arm1_cs_type,
-            LaunchConfiguration("use_fake_hardware"),
+            use_fake_hardware,
             LaunchConfiguration("headless_mode"),
             LaunchConfiguration("controller_spawner_timeout"),
         ),
@@ -227,7 +233,7 @@ def setup_arms(context, *args, **kwargs):
                 LaunchConfiguration("arm2_script_command_port"),
             ),
             arm2_cs_type,
-            LaunchConfiguration("use_fake_hardware"),
+            use_fake_hardware,
             LaunchConfiguration("headless_mode"),
             LaunchConfiguration("controller_spawner_timeout"),
         ),
@@ -286,15 +292,16 @@ def generate_launch_description():
 
 对于 `cs520h` 等五轴型号，模板会自动选择该机械臂对应的五轴控制器配置和关节列表。
 
-注意：fake hardware 的 mock 接口不提供 GPIO command interfaces，因此
-`io_and_status_controller` 在 fake 测试中可能显示为 `inactive`；这不是双臂
-namespace 或轨迹控制器错误。真机运行时该控制器应按实际硬件接口正常激活。
+Jazzy 的 fake hardware 不提供有效的速度缩放反馈，因此示例在 fake 模式下使用
+`joint_trajectory_controller`，MoveIt 也选择同一个控制器。由于模拟硬件缺少运行时
+配置命令接口，`io_and_status_controller` 保持 `inactive`。真机模式使用
+`scaled_joint_trajectory_controller` 并激活 IO 控制器。
 
 ## 3. 编译并启动
 
 ```bash
 cd ~/elite_ros_ws
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 colcon build --packages-up-to elite_robots_driver elite_robots_moveit_config
 source install/setup.bash
 ```
@@ -481,7 +488,7 @@ def arm_moveit(namespace, prefix, cs_type, use_fake_hardware, launch_rviz):
                 "moveit_controllers_file": make_controller_file(prefix, cs_type),
                 "kinematics_file": make_kinematics_file(group),
                 "rviz_config_file": make_rviz_file(group, namespace),
-                "prefer_scaled_controller": "true",
+                "prefer_scaled_controller": "false" if use_fake_hardware.lower() == "true" else "true",
             }.items(),
         ),
     ])
@@ -490,15 +497,16 @@ def arm_moveit(namespace, prefix, cs_type, use_fake_hardware, launch_rviz):
 def setup_arms(context, *args, **kwargs):
     arm1_cs_type = LaunchConfiguration("arm1_cs_type").perform(context)
     arm2_cs_type = LaunchConfiguration("arm2_cs_type").perform(context)
+    use_fake_hardware = LaunchConfiguration("use_fake_hardware").perform(context)
     return [
         arm_moveit(
             "arm1", "arm1_", arm1_cs_type,
-            LaunchConfiguration("use_fake_hardware"),
+            use_fake_hardware,
             LaunchConfiguration("launch_rviz"),
         ),
         arm_moveit(
             "arm2", "arm2_", arm2_cs_type,
-            LaunchConfiguration("use_fake_hardware"),
+            use_fake_hardware,
             LaunchConfiguration("launch_rviz"),
         ),
     ]

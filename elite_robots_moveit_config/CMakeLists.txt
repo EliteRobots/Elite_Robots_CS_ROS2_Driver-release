@@ -12,7 +12,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 install(DIRECTORY config launch rviz srdf
   DESTINATION share/${PROJECT_NAME}
 )
-install(DIRECTORY example/doc
+install(DIRECTORY example/doc/
   DESTINATION share/${PROJECT_NAME}/example/doc
 )
 
@@ -26,6 +26,7 @@ add_executable(
   example_moveit_pose_goal
   example/cpp/example_moveit_pose_goal.cpp
 )
+target_compile_features(example_moveit_pose_goal PRIVATE cxx_std_17)
 ament_target_dependencies(
   example_moveit_pose_goal
   rclcpp

@@ -2,19 +2,19 @@
 
 ## Launch files
 在`elite_robots_driver`包中有一个启动文件来启动CS系列机器人的驱动程序：
-- elite_control.launch.py - 启动了 [ros2_control](https://control.ros.org/humble/index.html) 节点，此节点包括： hardware interface、joint state broadcaster以及一个controller。 如果使用的是真机，此驱动程序同样会启动dashboard_client和primary_client。
+- elite_control.launch.py - 启动了 [ros2_control](https://control.ros.org/jazzy/index.html) 节点，此节点包括： hardware interface、joint state broadcaster以及一个controller。 如果使用的是真机，此驱动程序同样会启动dashboard_client和primary_client。
 
 使用 `ros2 launch elite_robots_driver elite_control.launch.py --show-args`指令能看到启动文件的参数以及解释。比较经常实用的参数以及解释如下:
 - `cs_type` (mandatory) - 机器人类型（`cs63`、`cs63a`、`cs66`、`cs66a`、`cs68`、`cs612`、`cs616`、`cs618f`、`cs620`、`cs625`、`cs630`、`cs520h`、`ls65`）。如果类型以 `h` 结尾（五轴），launch 会自动使用五轴 URDF 和控制器配置。
 - `robot_ip` (mandatory) - 机器人FB1的IP（确保能连通）。
 - `local_ip` (mandatory) - 外部控制器的IP（确保机器人能连通）。
-- `use_fake_hardware` (default: false ) - 使用来自[ros2_control](https://control.ros.org/humble/index.html)的简单硬件模拟器。用于测试启动文件、描述等。见下面的解释。
+- `use_fake_hardware` (default: false ) - 使用来自[ros2_control](https://control.ros.org/jazzy/index.html)的简单硬件模拟器。用于测试启动文件、描述等。见下面的解释。
 - `fake_sensor_commands` (default: false ) - 允许为硬件模拟器设置传感器值。用于控制器的离线测试。
 - `initial_joint_controller`(default: scaled_joint_trajectory_controller) - 用于控制机器人关节的控制器。可选的控制器有:
     - joint_trajectory_controller
     - scaled_joint_trajectory_controller
 
-> 注意：以下的控制器也会被启动：joint_state_broadcaster、speed_scaling_state_broadcaster、force_torque_sensor_broadcaster、io_and_status_controller。
+> 注意：`spawn_controllers:=true` 时会加载状态广播器和 IO 控制器。虚拟硬件的 IO 控制器保持未激活，并将 `scaled_joint_trajectory_controller` 替换为 `joint_trajectory_controller`，因为 GenericSystem 不模拟机器人的 IO 初始化握手和速度缩放。
 
 > 注意：使用`ros2 control list_controllers`指令可以查看ros2正在使用的控制器。因此必须安装ros2controlcli包，可以使用指令：`sudo apt-get install ros-${ROS_DISTRO}-ros2controlcli`安装。
 

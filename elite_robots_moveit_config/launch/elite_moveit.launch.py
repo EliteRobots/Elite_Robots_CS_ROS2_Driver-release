@@ -1,5 +1,5 @@
 # Author: Chen Shichao
-
+# Fixes for Jazzy : Du Kang
 import os
 
 from launch_ros.actions import Node
@@ -144,21 +144,42 @@ def launch_setup(context, *args, **kwargs):
         [FindPackageShare(moveit_config_package), "config", kinematics_file_value]
     )
 
-    robot_description_planning = {
-        "robot_description_planning": load_yaml(
-            str(moveit_config_package.perform(context)),
-            os.path.join("config", moveit_joint_limits_file_value),
-        )
-    }
+    joint_limits_config = load_yaml(
+        str(moveit_config_package.perform(context)),
+        os.path.join("config", moveit_joint_limits_file_value),
+    )
+    prefix_value = prefix.perform(context)
+    # Older launch defaults used shell quotes to express an empty Xacro prefix.
+    # Those quotes are not part of the joint names in YAML parameters.
+    if prefix_value in ('""', "''"):
+        prefix_value = ""
+    if prefix_value and "joint_limits" in joint_limits_config:
+        joint_limits_config["joint_limits"] = {
+            (name if name.startswith(prefix_value) else prefix_value + name): limits
+            for name, limits in joint_limits_config["joint_limits"].items()
+        }
+    robot_description_planning = {"robot_description_planning": joint_limits_config}
 
-    # Planning Configuration
+    # Planning Configuration - Jazzy compatible
     ompl_planning_pipeline_config = {
         "move_group": {
-            "planning_plugin": "ompl_interface/OMPLPlanner",
-            "request_adapters": """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""",
+            "planning_plugins": ["ompl_interface/OMPLPlanner"],
+            "request_adapters": [
+                "default_planning_request_adapters/ResolveConstraintFrames",
+                "default_planning_request_adapters/ValidateWorkspaceBounds",
+                "default_planning_request_adapters/CheckStartStateBounds",
+                "default_planning_request_adapters/CheckStartStateCollision",
+            ],
+            "response_adapters": [
+                "default_planning_response_adapters/AddTimeOptimalParameterization",
+                "default_planning_response_adapters/ValidateSolution",
+                "default_planning_response_adapters/DisplayMotionPath",
+            ],
             "start_state_max_bounds_error": 0.1,
         }
     }
+
+    # Load OMPL planning configuration
     ompl_planning_yaml = load_yaml("elite_robots_moveit_config", "config/ompl_planning.yaml")
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
@@ -261,7 +282,7 @@ def launch_setup(context, *args, **kwargs):
     servo_node = Node(
         package="moveit_servo",
         condition=IfCondition(launch_servo),
-        executable="servo_node_main",
+        executable="servo_node",
         parameters=[
             servo_params,
             robot_description,
@@ -378,7 +399,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "prefix",
-            default_value='""',
+            default_value="",
             description="Prefix of the joint names, useful for "
             "multi-robot setup. If changed than also joint names in the controllers' configuration "
             "have to be updated.",

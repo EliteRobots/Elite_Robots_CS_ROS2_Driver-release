@@ -30,7 +30,7 @@ YAML overrides this default. Set it to `false` to disable locking, or to `true`
 only after allowing enough locked memory for all hardware and controllers.
 Real-time scheduling permissions are separate: `Operation not permitted` when
 enabling FIFO scheduling indicates an insufficient `rtprio` allowance. See the
-[Humble controller manager setup](https://control.ros.org/humble/doc/ros2_control/controller_manager/doc/userdoc.html#determinism).
+[Jazzy controller manager setup](https://control.ros.org/jazzy/doc/ros2_control/controller_manager/doc/userdoc.html#determinism).
 
 ## A note about modes
 

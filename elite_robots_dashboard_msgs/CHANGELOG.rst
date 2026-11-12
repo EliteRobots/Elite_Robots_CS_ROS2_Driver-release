@@ -4,12 +4,8 @@ Changelog for package elite_robots_dashboard_msgs
 
 1.2.0 (2026-11-03)
 ------------------
-* Synchronize the package version to 1.2.0 for the multi-arm launch and documentation release.
-
-1.1.0 (2026-09-04)
-------------------
-* Add services for setting remote control and querying the current remote control mode.
-* Contributors: dukang123
+* Add remote control mode query and configuration service definitions.
+* Synchronize the package version to 1.2.0 for the Jazzy feature parity release.
 
 1.0.3 (2026-08-31)
 ------------------

@@ -4,12 +4,8 @@ Changelog for package elite_robots_controllers
 
 1.2.0 (2026-11-03)
 ------------------
-* Synchronize the package version to 1.2.0 for the multi-arm launch and documentation release.
-
-1.1.0 (2026-09-04)
-------------------
-* Add GPIO controller services for enabling collision detection, setting collision sensitivity, and configuring the mounting plane.
-* Contributors: dukang123
+* Add collision detection, collision sensitivity, and mounting plane services using Jazzy hardware interfaces; release all services on deactivation.
+* Synchronize the package version to 1.2.0 for the Jazzy feature parity release.
 
 1.0.3 (2026-08-31)
 ------------------

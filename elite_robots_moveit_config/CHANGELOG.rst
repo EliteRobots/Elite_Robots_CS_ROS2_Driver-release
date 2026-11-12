@@ -4,16 +4,15 @@ Changelog for package elite_robots_moveit_config
 
 1.2.0 (2026-11-03)
 ------------------
+* Normalize empty joint prefixes so acceleration limits reach the Jazzy time-parameterization adapter.
 * Propagate the joint prefix to the robot description TF prefix for multi-arm setups.
+* Apply the joint prefix to MoveIt joint limits so Jazzy trajectory time parameterization finds each arm's acceleration limits.
 * Add configurable kinematics and RViz files and accept absolute paths for these files and MoveIt controller configurations.
 * Add an option to prefer the scaled trajectory controller and tolerate omitted controller entries in custom configurations.
-
-1.1.0 (2026-09-04)
-------------------
 * Add C++ and Python Cartesian pose goal examples with bilingual documentation.
 * Add CS63A and CS630 launch support.
 * Increase trajectory execution margins for robot motion and declare the example dependencies.
-* Contributors: dukang123
+* Correct the default robot description package name and pass kinematics to the Jazzy Servo node.
 
 1.0.3 (2026-08-31)
 ------------------

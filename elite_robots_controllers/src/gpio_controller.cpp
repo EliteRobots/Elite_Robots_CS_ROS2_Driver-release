@@ -1,8 +1,22 @@
 #include "elite_robots_controllers/gpio_controller.hpp"
 
+#include <limits>
 #include <string>
+#include <tuple>
 
 namespace ELITE_CS_CONTROLLER {
+namespace {
+template <typename InterfaceT>
+double getInterfaceValue(const InterfaceT& interface) {
+    return interface.get_optional().value_or(std::numeric_limits<double>::quiet_NaN());
+}
+
+template <typename InterfaceT>
+void setInterfaceValue(InterfaceT& interface, double value) {
+    std::ignore = interface.set_value(value);
+}
+}  // namespace
+
 controller_interface::CallbackReturn GPIOController::on_init() {
     try {
         initMsgs();
@@ -159,8 +173,6 @@ controller_interface::return_type ELITE_CS_CONTROLLER::GPIOController::update(co
 
 controller_interface::CallbackReturn ELITE_CS_CONTROLLER::GPIOController::on_configure(
     const rclcpp_lifecycle::State& /*previous_state*/) {
-    const auto logger = get_node()->get_logger();
-
     if (!param_listener_) {
         RCLCPP_ERROR(get_node()->get_logger(), "Error encountered during init");
         return controller_interface::CallbackReturn::ERROR;
@@ -177,47 +189,47 @@ controller_interface::CallbackReturn ELITE_CS_CONTROLLER::GPIOController::on_con
 
 void GPIOController::publishIO() {
     for (size_t i = 0; i < STANDARD_DIG_GPIO_NUM; ++i) {
-        io_msg_.standard_out[i] = static_cast<bool>(state_interfaces_[i].get_value());
-        io_msg_.standard_in[i] = static_cast<bool>(state_interfaces_[i + (int)StateOffset::STANDARD_DIG_IN].get_value());
+        io_msg_.standard_out[i] = static_cast<bool>(getInterfaceValue(state_interfaces_[i]));
+        io_msg_.standard_in[i] = static_cast<bool>(getInterfaceValue(state_interfaces_[i + (int)StateOffset::STANDARD_DIG_IN]));
     }
     for (size_t i = 0; i < CONF_DIG_GPIO_NUM; ++i) {
-        io_msg_.config_out[i] = static_cast<bool>(state_interfaces_[i + (int)StateOffset::CONFIGURE_DIG_OUT].get_value());
-        io_msg_.config_in[i] = static_cast<bool>(state_interfaces_[i + (int)StateOffset::CONFIGURE_DIG_IN].get_value());
+        io_msg_.config_out[i] = static_cast<bool>(getInterfaceValue(state_interfaces_[i + (int)StateOffset::CONFIGURE_DIG_OUT]));
+        io_msg_.config_in[i] = static_cast<bool>(getInterfaceValue(state_interfaces_[i + (int)StateOffset::CONFIGURE_DIG_IN]));
     }
     for (size_t i = 0; i < TOOL_DIG_GPIO_NUM; ++i) {
-        io_msg_.tool_out[i] = static_cast<bool>(state_interfaces_[i + (int)StateOffset::TOOL_DIG_OUT].get_value());
-        io_msg_.tool_in[i] = static_cast<bool>(state_interfaces_[i + (int)StateOffset::TOOL_DIG_IN].get_value());
+        io_msg_.tool_out[i] = static_cast<bool>(getInterfaceValue(state_interfaces_[i + (int)StateOffset::TOOL_DIG_OUT]));
+        io_msg_.tool_in[i] = static_cast<bool>(getInterfaceValue(state_interfaces_[i + (int)StateOffset::TOOL_DIG_IN]));
     }
 
-    io_msg_.standard_analog_in[0].type = (uint8_t)state_interfaces_[(int)StateOffset::STANDARD_ANALOG_IN_TYPE1].get_value();
-    io_msg_.standard_analog_in[0].value = state_interfaces_[(int)StateOffset::STANDARD_ANALOG_IN1].get_value();
+    io_msg_.standard_analog_in[0].type = (uint8_t)getInterfaceValue(state_interfaces_[(int)StateOffset::STANDARD_ANALOG_IN_TYPE1]);
+    io_msg_.standard_analog_in[0].value = getInterfaceValue(state_interfaces_[(int)StateOffset::STANDARD_ANALOG_IN1]);
 
-    io_msg_.standard_analog_in[1].type = (uint8_t)state_interfaces_[(int)StateOffset::STANDARD_ANALOG_IN_TYPE2].get_value();
-    io_msg_.standard_analog_in[1].value = state_interfaces_[(int)StateOffset::STANDARD_ANALOG_IN2].get_value();
+    io_msg_.standard_analog_in[1].type = (uint8_t)getInterfaceValue(state_interfaces_[(int)StateOffset::STANDARD_ANALOG_IN_TYPE2]);
+    io_msg_.standard_analog_in[1].value = getInterfaceValue(state_interfaces_[(int)StateOffset::STANDARD_ANALOG_IN2]);
 
-    io_msg_.standard_analog_out[0].type = state_interfaces_[(int)StateOffset::STANDARD_ANALOG_OUT_TYPE1].get_value();
-    io_msg_.standard_analog_out[0].value = state_interfaces_[(int)StateOffset::STANDARD_ANALOG_OUT1].get_value();
+    io_msg_.standard_analog_out[0].type = getInterfaceValue(state_interfaces_[(int)StateOffset::STANDARD_ANALOG_OUT_TYPE1]);
+    io_msg_.standard_analog_out[0].value = getInterfaceValue(state_interfaces_[(int)StateOffset::STANDARD_ANALOG_OUT1]);
 
-    io_msg_.standard_analog_out[1].type = state_interfaces_[(int)StateOffset::STANDARD_ANALOG_OUT_TYPE2].get_value();
-    io_msg_.standard_analog_out[1].value = state_interfaces_[(int)StateOffset::STANDARD_ANALOG_OUT2].get_value();
+    io_msg_.standard_analog_out[1].type = getInterfaceValue(state_interfaces_[(int)StateOffset::STANDARD_ANALOG_OUT_TYPE2]);
+    io_msg_.standard_analog_out[1].value = getInterfaceValue(state_interfaces_[(int)StateOffset::STANDARD_ANALOG_OUT2]);
 
     io_pub_->publish(io_msg_);
 }
 
 void GPIOController::publishToolData() {
-    tool_data_msg_.mode = static_cast<uint8_t>(state_interfaces_[(int)StateOffset::TOOL_MODE].get_value());
-    tool_data_msg_.output_voltage = state_interfaces_[(int)StateOffset::TOOL_OUTPUT_VOLTAGE].get_value();
-    tool_data_msg_.output_current = state_interfaces_[(int)StateOffset::TOOL_OUTPUT_CURRENT].get_value();
-    tool_data_msg_.temperature = state_interfaces_[(int)StateOffset::TOOL_TEMPERATURE].get_value();
-    tool_data_msg_.analog_input_type = (uint8_t)state_interfaces_[(int)StateOffset::TOOL_ANALOG_INPUT_TYPE].get_value();
-    tool_data_msg_.analog_input = state_interfaces_[(int)StateOffset::TOOL_ANALOG_INPUT].get_value();
-    tool_data_msg_.analog_output_type = (uint8_t)state_interfaces_[(int)StateOffset::TOOL_ANALOG_OUTPUT_TYPE].get_value();
-    tool_data_msg_.analog_output = state_interfaces_[(int)StateOffset::TOOL_ANALOG_OUTPUT].get_value();
+    tool_data_msg_.mode = static_cast<uint8_t>(getInterfaceValue(state_interfaces_[(int)StateOffset::TOOL_MODE]));
+    tool_data_msg_.output_voltage = getInterfaceValue(state_interfaces_[(int)StateOffset::TOOL_OUTPUT_VOLTAGE]);
+    tool_data_msg_.output_current = getInterfaceValue(state_interfaces_[(int)StateOffset::TOOL_OUTPUT_CURRENT]);
+    tool_data_msg_.temperature = getInterfaceValue(state_interfaces_[(int)StateOffset::TOOL_TEMPERATURE]);
+    tool_data_msg_.analog_input_type = (uint8_t)getInterfaceValue(state_interfaces_[(int)StateOffset::TOOL_ANALOG_INPUT_TYPE]);
+    tool_data_msg_.analog_input = getInterfaceValue(state_interfaces_[(int)StateOffset::TOOL_ANALOG_INPUT]);
+    tool_data_msg_.analog_output_type = (uint8_t)getInterfaceValue(state_interfaces_[(int)StateOffset::TOOL_ANALOG_OUTPUT_TYPE]);
+    tool_data_msg_.analog_output = getInterfaceValue(state_interfaces_[(int)StateOffset::TOOL_ANALOG_OUTPUT]);
     tool_data_pub_->publish(tool_data_msg_);
 }
 
 void GPIOController::publishRobotMode() {
-    auto robot_mode = static_cast<int8_t>(state_interfaces_[(int)StateOffset::ROBOT_MODE].get_value());
+    auto robot_mode = static_cast<int8_t>(getInterfaceValue(state_interfaces_[(int)StateOffset::ROBOT_MODE]));
 
     if (robot_mode_msg_.mode != robot_mode) {
         robot_mode_msg_.mode = robot_mode;
@@ -226,7 +238,7 @@ void GPIOController::publishRobotMode() {
 }
 
 void GPIOController::publishSafetyMode() {
-    auto safety_mode = static_cast<uint8_t>(state_interfaces_[(int)StateOffset::SAFETY_MODE].get_value());
+    auto safety_mode = static_cast<uint8_t>(getInterfaceValue(state_interfaces_[(int)StateOffset::SAFETY_MODE]));
 
     if (safety_mode_msg_.mode != safety_mode) {
         safety_mode_msg_.mode = safety_mode;
@@ -235,7 +247,7 @@ void GPIOController::publishSafetyMode() {
 }
 
 void GPIOController::publishTaskRunning() {
-    auto task_running_value = static_cast<uint8_t>(state_interfaces_[(int)StateOffset::TASK_RUNNING].get_value());
+    auto task_running_value = static_cast<uint8_t>(getInterfaceValue(state_interfaces_[(int)StateOffset::TASK_RUNNING]));
     bool task_running = task_running_value == 1.0 ? true : false;
     if (task_running_msg_.data != task_running) {
         task_running_msg_.data = task_running;
@@ -245,7 +257,7 @@ void GPIOController::publishTaskRunning() {
 
 controller_interface::CallbackReturn ELITE_CS_CONTROLLER::GPIOController::on_activate(
     const rclcpp_lifecycle::State& /*previous_state*/) {
-    while (state_interfaces_[(int)StateOffset::INITIALIZED_FLAG].get_value() == 0.0) {
+    while (getInterfaceValue(state_interfaces_[(int)StateOffset::INITIALIZED_FLAG]) == 0.0) {
         RCLCPP_INFO(get_node()->get_logger(), "Waiting for system interface to initialize...");
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
@@ -328,83 +340,83 @@ controller_interface::CallbackReturn ELITE_CS_CONTROLLER::GPIOController::on_dea
 bool GPIOController::setIO(elite_robots_msgs::srv::SetIO::Request::SharedPtr req, elite_robots_msgs::srv::SetIO::Response::SharedPtr resp) {
     if (req->fun == req->FUN_SET_DIGITAL_OUT && req->pin >= 0 && req->pin <= STANDARD_DIG_GPIO_NUM) {
         // io async success
-        command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].set_value(ASYNC_WAITING);
-        command_interfaces_[req->pin].set_value(static_cast<double>(req->state));
+        setInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS], ASYNC_WAITING);
+        setInterfaceValue(command_interfaces_[req->pin], static_cast<double>(req->state));
 
         RCLCPP_INFO(get_node()->get_logger(), "Setting standard digital output '%d' to state: '%1.0f'.", req->pin, req->state);
 
-        if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value(); })) {
+        if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]); })) {
             RCLCPP_WARN(get_node()->get_logger(),
                         "Could not verify that io was set. (This might happen when using the "
                         "mocked interface)");
         }
 
-        resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value());
+        resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]));
         return resp->success;
     } else if(req->fun == req->FUN_SET_CONFIGURE_OUT && req->pin >= 0 && req->pin <= CONF_DIG_GPIO_NUM) {
         // io async success
-        command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].set_value(ASYNC_WAITING);
-        command_interfaces_[req->pin + (int)CommandOffset::CONFIGURE_DIG_OUT].set_value(static_cast<double>(req->state));
+        setInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS], ASYNC_WAITING);
+        setInterfaceValue(command_interfaces_[req->pin + (int)CommandOffset::CONFIGURE_DIG_OUT], static_cast<double>(req->state));
 
         RCLCPP_INFO(get_node()->get_logger(), "Setting config digital output '%d' to state: '%1.0f'.", req->pin, req->state);
 
-        if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value(); })) {
+        if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]); })) {
             RCLCPP_WARN(get_node()->get_logger(),
                         "Could not verify that io was set. (This might happen when using the "
                         "mocked interface)");
         }
 
-        resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value());
+        resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]));
         return resp->success;
     }  else if(req->fun == req->FUN_SET_TOOL_DIG_OUT && req->pin >= 0 && req->pin <= TOOL_DIG_GPIO_NUM) {
         // io async success
-        command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].set_value(ASYNC_WAITING);
-        command_interfaces_[req->pin + (int)CommandOffset::TOOL_DIG_OUT].set_value(static_cast<double>(req->state));
+        setInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS], ASYNC_WAITING);
+        setInterfaceValue(command_interfaces_[req->pin + (int)CommandOffset::TOOL_DIG_OUT], static_cast<double>(req->state));
 
         RCLCPP_INFO(get_node()->get_logger(), "Setting tool digital output '%d' to state: '%1.0f'.", req->pin, req->state);
 
-        if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value(); })) {
+        if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]); })) {
             RCLCPP_WARN(get_node()->get_logger(),
                         "Could not verify that io was set. (This might happen when using the "
                         "mocked interface)");
         }
 
-        resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value());
+        resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]));
         return resp->success;
     } else if (req->fun == req->FUN_SET_ANALOG_OUT && req->pin >= 0 && req->pin <= STANDARD_DIG_GPIO_NUM) {
         // io async success
-        command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].set_value(ASYNC_WAITING);
+        setInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS], ASYNC_WAITING);
         if(req->pin == 0) {
-            command_interfaces_[(int)CommandOffset::STANDARD_ANALOG_OUT].set_value(static_cast<double>(req->state));
-            command_interfaces_[(int)CommandOffset::STANDARD_ANALOG_OUT + 1].set_value(static_cast<double>(req->analog_type));
+            setInterfaceValue(command_interfaces_[(int)CommandOffset::STANDARD_ANALOG_OUT], static_cast<double>(req->state));
+            setInterfaceValue(command_interfaces_[(int)CommandOffset::STANDARD_ANALOG_OUT + 1], static_cast<double>(req->analog_type));
         } else {
-            command_interfaces_[(int)CommandOffset::STANDARD_ANALOG_OUT + 2].set_value(static_cast<double>(req->state));
-            command_interfaces_[(int)CommandOffset::STANDARD_ANALOG_OUT + 3].set_value(static_cast<double>(req->analog_type));
+            setInterfaceValue(command_interfaces_[(int)CommandOffset::STANDARD_ANALOG_OUT + 2], static_cast<double>(req->state));
+            setInterfaceValue(command_interfaces_[(int)CommandOffset::STANDARD_ANALOG_OUT + 3], static_cast<double>(req->analog_type));
         }
         RCLCPP_INFO(get_node()->get_logger(), "Setting analog output '%d' to type: '%d' state: '%.4f'.", req->pin, req->analog_type, req->state);
         
 
-        if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value(); })) {
+        if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]); })) {
             RCLCPP_WARN(get_node()->get_logger(),
                         "Could not verify that io was set. (This might happen when using the "
                         "mocked interface)");
         }
 
-        resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value());
+        resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]));
         return resp->success;
     } else if (req->fun == req->FUN_SET_TOOL_VOLTAGE) {
-        command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].set_value(ASYNC_WAITING);
-        command_interfaces_[(int)CommandOffset::TOOL_VOLTAGE].set_value(static_cast<double>(req->state));
+        setInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS], ASYNC_WAITING);
+        setInterfaceValue(command_interfaces_[(int)CommandOffset::TOOL_VOLTAGE], static_cast<double>(req->state));
 
         RCLCPP_INFO(get_node()->get_logger(), "Setting tool voltage to: '%1.0f'.", req->state);
 
-        if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value(); })) {
+        if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]); })) {
             RCLCPP_WARN(get_node()->get_logger(),
                         "Could not verify that io was set. (This might happen when using the "
                         "mocked interface)");
         }
 
-        resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS].get_value());
+        resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::IO_ASYNC_SUCCESS]));
         return resp->success;
     } else {
         resp->success = false;
@@ -417,18 +429,18 @@ bool GPIOController::setSpeedSlider(elite_robots_msgs::srv::SetSpeedSliderFracti
     if (req->speed_slider_fraction >= 0.01 && req->speed_slider_fraction <= 1.0) {
         RCLCPP_INFO(get_node()->get_logger(), "Setting speed slider to %.2f%%.", req->speed_slider_fraction * 100.0);
         // reset success flag
-        command_interfaces_[(int)CommandOffset::TARGET_SPEED_FRACTION_SUCCESS].set_value(ASYNC_WAITING);
+        setInterfaceValue(command_interfaces_[(int)CommandOffset::TARGET_SPEED_FRACTION_SUCCESS], ASYNC_WAITING);
         // set commanding value for speed slider
-        command_interfaces_[(int)CommandOffset::TARGET_SPEED_FRACTION].set_value(
-            static_cast<double>(req->speed_slider_fraction));
+        setInterfaceValue(command_interfaces_[(int)CommandOffset::TARGET_SPEED_FRACTION],
+                          static_cast<double>(req->speed_slider_fraction));
 
         if (!waitForAsyncCommand(
-                [&]() { return command_interfaces_[(int)CommandOffset::TARGET_SPEED_FRACTION_SUCCESS].get_value(); })) {
+                [&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::TARGET_SPEED_FRACTION_SUCCESS]); })) {
             RCLCPP_WARN(get_node()->get_logger(),
                         "Could not verify that target speed fraction was set. (This might happen "
                         "when using the mocked interface)");
         }
-        resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::TARGET_SPEED_FRACTION_SUCCESS].get_value());
+        resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::TARGET_SPEED_FRACTION_SUCCESS]));
     } else {
         RCLCPP_WARN(get_node()->get_logger(),
                     "The desired speed slider fraction must be within range (0; 1.0]. Request "
@@ -442,17 +454,17 @@ bool GPIOController::setSpeedSlider(elite_robots_msgs::srv::SetSpeedSliderFracti
 bool GPIOController::resendRobotControlScript(std_srvs::srv::Trigger::Request::SharedPtr /*req*/,
                                         std_srvs::srv::Trigger::Response::SharedPtr resp) {
     // reset success flag
-    command_interfaces_[(int)CommandOffset::RESEND_ROBOT_CONTROL_SCRIPT_SUCCESS].set_value(ASYNC_WAITING);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::RESEND_ROBOT_CONTROL_SCRIPT_SUCCESS], ASYNC_WAITING);
     // call the service in the hardware
-    command_interfaces_[(int)CommandOffset::RESEND_ROBOT_CONTROL_SCRIPT].set_value(1.0);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::RESEND_ROBOT_CONTROL_SCRIPT], 1.0);
 
     if (!waitForAsyncCommand(
-            [&]() { return command_interfaces_[(int)CommandOffset::RESEND_ROBOT_CONTROL_SCRIPT_SUCCESS].get_value(); })) {
+            [&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::RESEND_ROBOT_CONTROL_SCRIPT_SUCCESS]); })) {
         RCLCPP_WARN(get_node()->get_logger(),
                     "Could not verify that program was sent. (This might happen when using the "
                     "mocked interface)");
     }
-    resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::RESEND_ROBOT_CONTROL_SCRIPT_SUCCESS].get_value());
+    resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::RESEND_ROBOT_CONTROL_SCRIPT_SUCCESS]));
 
     if (resp->success) {
         RCLCPP_INFO(get_node()->get_logger(), "Successfully resent robot program");
@@ -467,17 +479,17 @@ bool GPIOController::resendRobotControlScript(std_srvs::srv::Trigger::Request::S
 bool GPIOController::handBackControl(std_srvs::srv::Trigger::Request::SharedPtr /*req*/,
                                      std_srvs::srv::Trigger::Response::SharedPtr resp) {
     // reset success flag
-    command_interfaces_[(int)CommandOffset::HAND_BACK_CONTROL_SUCCESS].set_value(ASYNC_WAITING);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::HAND_BACK_CONTROL_SUCCESS], ASYNC_WAITING);
     // call the service in the hardware
-    command_interfaces_[(int)CommandOffset::HAND_BACK_CONTROL].set_value(1.0);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::HAND_BACK_CONTROL], 1.0);
 
     if (!waitForAsyncCommand(
-            [&]() { return command_interfaces_[(int)CommandOffset::HAND_BACK_CONTROL_SUCCESS].get_value(); })) {
+            [&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::HAND_BACK_CONTROL_SUCCESS]); })) {
         RCLCPP_WARN(get_node()->get_logger(),
                     "Could not verify that hand_back_control was correctly triggered. (This "
                     "might happen when using the mocked interface)");
     }
-    resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::HAND_BACK_CONTROL_SUCCESS].get_value());
+    resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::HAND_BACK_CONTROL_SUCCESS]));
 
     if (resp->success) {
         RCLCPP_INFO(get_node()->get_logger(), "Deactivated control");
@@ -492,20 +504,20 @@ bool GPIOController::handBackControl(std_srvs::srv::Trigger::Request::SharedPtr 
 bool GPIOController::setPayload(const elite_robots_msgs::srv::SetPayload::Request::SharedPtr req,
                                 elite_robots_msgs::srv::SetPayload::Response::SharedPtr resp) {
     // reset success flag
-    command_interfaces_[(int)CommandOffset::PAYLOAD_SUCCESS].set_value(ASYNC_WAITING);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::PAYLOAD_SUCCESS], ASYNC_WAITING);
 
-    command_interfaces_[(int)CommandOffset::MASS].set_value(req->mass);
-    command_interfaces_[(int)CommandOffset::COG_X].set_value(req->center_of_gravity.x);
-    command_interfaces_[(int)CommandOffset::COG_Y].set_value(req->center_of_gravity.y);
-    command_interfaces_[(int)CommandOffset::COG_Z].set_value(req->center_of_gravity.z);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::MASS], static_cast<double>(req->mass));
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::COG_X], req->center_of_gravity.x);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::COG_Y], req->center_of_gravity.y);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::COG_Z], req->center_of_gravity.z);
 
-    if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::PAYLOAD_SUCCESS].get_value(); })) {
+    if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::PAYLOAD_SUCCESS]); })) {
         RCLCPP_WARN(get_node()->get_logger(),
                     "Could not verify that payload was set. (This might happen when using the "
                     "mocked interface)");
     }
 
-    resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::PAYLOAD_SUCCESS].get_value());
+    resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::PAYLOAD_SUCCESS]));
 
     if (resp->success) {
         RCLCPP_INFO(get_node()->get_logger(), "Payload has been set successfully");
@@ -520,17 +532,17 @@ bool GPIOController::setPayload(const elite_robots_msgs::srv::SetPayload::Reques
 bool GPIOController::zeroFTSensor(std_srvs::srv::Trigger::Request::SharedPtr /*req*/,
                                   std_srvs::srv::Trigger::Response::SharedPtr resp) {
     // reset success flag
-    command_interfaces_[(int)CommandOffset::ZERO_FTSENSOR_SUCCESS].set_value(ASYNC_WAITING);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::ZERO_FTSENSOR_SUCCESS], ASYNC_WAITING);
     // call the service in the hardware
-    command_interfaces_[(int)CommandOffset::ZERO_FTSENSOR].set_value(1.0);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::ZERO_FTSENSOR], 1.0);
 
-    if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::ZERO_FTSENSOR_SUCCESS].get_value(); })) {
+    if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::ZERO_FTSENSOR_SUCCESS]); })) {
         RCLCPP_WARN(get_node()->get_logger(),
                     "Could not verify that FTS was zeroed. (This might happen when using the "
                     "mocked interface)");
     }
 
-    resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::ZERO_FTSENSOR_SUCCESS].get_value());
+    resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::ZERO_FTSENSOR_SUCCESS]));
 
     if (resp->success) {
         RCLCPP_INFO(get_node()->get_logger(), "Successfully zeroed the force torque sensor");
@@ -545,15 +557,15 @@ bool GPIOController::zeroFTSensor(std_srvs::srv::Trigger::Request::SharedPtr /*r
 bool GPIOController::setCollisionDetectEnabled(
     const elite_robots_msgs::srv::SetCollisionDetectEnabled::Request::SharedPtr req,
     elite_robots_msgs::srv::SetCollisionDetectEnabled::Response::SharedPtr resp) {
-    command_interfaces_[(int)CommandOffset::COLLISION_DETECT_ENABLED_SUCCESS].set_value(ASYNC_WAITING);
-    command_interfaces_[(int)CommandOffset::COLLISION_DETECT_ENABLED].set_value(req->enable ? 1.0 : 0.0);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::COLLISION_DETECT_ENABLED_SUCCESS], ASYNC_WAITING);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::COLLISION_DETECT_ENABLED], req->enable ? 1.0 : 0.0);
 
-    if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::COLLISION_DETECT_ENABLED_SUCCESS].get_value(); })) {
+    if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::COLLISION_DETECT_ENABLED_SUCCESS]); })) {
         RCLCPP_WARN(get_node()->get_logger(),
                     "Could not verify that collision detection was set. (This might happen when using the mocked interface)");
     }
 
-    resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::COLLISION_DETECT_ENABLED_SUCCESS].get_value());
+    resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::COLLISION_DETECT_ENABLED_SUCCESS]));
     if (resp->success) {
         RCLCPP_INFO(get_node()->get_logger(), "Collision detection has been %s", req->enable ? "enabled" : "disabled");
     } else {
@@ -572,15 +584,15 @@ bool GPIOController::setCollisionSensitivity(
         return false;
     }
 
-    command_interfaces_[(int)CommandOffset::COLLISION_SENSITIVITY_SUCCESS].set_value(ASYNC_WAITING);
-    command_interfaces_[(int)CommandOffset::COLLISION_SENSITIVITY].set_value(static_cast<double>(req->ratio));
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::COLLISION_SENSITIVITY_SUCCESS], ASYNC_WAITING);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::COLLISION_SENSITIVITY], static_cast<double>(req->ratio));
 
-    if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::COLLISION_SENSITIVITY_SUCCESS].get_value(); })) {
+    if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::COLLISION_SENSITIVITY_SUCCESS]); })) {
         RCLCPP_WARN(get_node()->get_logger(),
                     "Could not verify that collision sensitivity was set. (This might happen when using the mocked interface)");
     }
 
-    resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::COLLISION_SENSITIVITY_SUCCESS].get_value());
+    resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::COLLISION_SENSITIVITY_SUCCESS]));
     if (resp->success) {
         RCLCPP_INFO(get_node()->get_logger(), "Collision sensitivity has been set to %d%%", req->ratio);
     } else {
@@ -592,16 +604,16 @@ bool GPIOController::setCollisionSensitivity(
 
 bool GPIOController::setMountingPlane(const elite_robots_msgs::srv::SetMountingPlane::Request::SharedPtr req,
                                       elite_robots_msgs::srv::SetMountingPlane::Response::SharedPtr resp) {
-    command_interfaces_[(int)CommandOffset::MOUNTING_PLANE_SUCCESS].set_value(ASYNC_WAITING);
-    command_interfaces_[(int)CommandOffset::MOUNTING_Z_ROTATION].set_value(req->z_rotation);
-    command_interfaces_[(int)CommandOffset::MOUNTING_TILT].set_value(req->tilt);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::MOUNTING_PLANE_SUCCESS], ASYNC_WAITING);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::MOUNTING_Z_ROTATION], req->z_rotation);
+    setInterfaceValue(command_interfaces_[(int)CommandOffset::MOUNTING_TILT], req->tilt);
 
-    if (!waitForAsyncCommand([&]() { return command_interfaces_[(int)CommandOffset::MOUNTING_PLANE_SUCCESS].get_value(); })) {
+    if (!waitForAsyncCommand([&]() { return getInterfaceValue(command_interfaces_[(int)CommandOffset::MOUNTING_PLANE_SUCCESS]); })) {
         RCLCPP_WARN(get_node()->get_logger(),
                     "Could not verify that mounting plane was set. (This might happen when using the mocked interface)");
     }
 
-    resp->success = static_cast<bool>(command_interfaces_[(int)CommandOffset::MOUNTING_PLANE_SUCCESS].get_value());
+    resp->success = static_cast<bool>(getInterfaceValue(command_interfaces_[(int)CommandOffset::MOUNTING_PLANE_SUCCESS]));
     if (resp->success) {
         RCLCPP_INFO(get_node()->get_logger(), "Mounting plane has been set to z_rotation %.6f rad, tilt %.6f rad", req->z_rotation,
                     req->tilt);

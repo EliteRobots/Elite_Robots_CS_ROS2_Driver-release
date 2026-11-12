@@ -4,12 +4,7 @@ Changelog for package elite_robots
 
 1.2.0 (2026-11-03)
 ------------------
-* Synchronize the package version to 1.2.0 for the multi-arm launch and documentation release.
-
-1.1.0 (2026-09-04)
-------------------
-* Synchronize the metapackage version for the repository-wide feature release.
-* Contributors: dukang123, Yan
+* Synchronize the package version to 1.2.0 for the Jazzy feature parity release.
 
 1.0.3 (2026-08-31)
 ------------------

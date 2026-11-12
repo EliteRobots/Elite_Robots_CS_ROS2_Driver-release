@@ -6,8 +6,8 @@
 
 ## Requirements
 - Elite_Robots_CS_SDK
-- ROS2 - humble
-- Ubuntu22.04
+- ROS2 - jazzy
+- Ubuntu24.04
 
 
 ## 此仓库中的包

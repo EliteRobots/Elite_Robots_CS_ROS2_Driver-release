@@ -6,8 +6,8 @@ This driver is developed on top of `Elite_Robots_CS_SDK` and support some key co
 
 ## Requirements
 - Elite_Robots_CS_SDK
-- ROS2 - humble
-- Ubuntu22.04
+- ROS2 - jazzy
+- Ubuntu24.04
 
 
 ## Packages in the Repository

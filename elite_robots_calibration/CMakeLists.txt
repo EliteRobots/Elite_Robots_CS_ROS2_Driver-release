@@ -7,12 +7,11 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(elite-cs-series-sdk REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
-
+find_package(ament_index_cpp REQUIRED)
 set(YAML_CPP_INCLUDE_DIRS ${YAML_CPP_INCLUDE_DIR})
 
 add_library(calibration
@@ -33,6 +32,7 @@ target_link_libraries(
 )
 ament_target_dependencies(calibration
   rclcpp
+  ament_index_cpp
 )
 
 add_executable(calibration_correction

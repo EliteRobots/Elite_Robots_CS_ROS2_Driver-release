@@ -1,0 +1,39 @@
+ros-jazzy-elite-robots-calibration (1.2.0-1noble) noble; urgency=high
+
+  * Synchronize the package version to 1.2.0 for the Jazzy feature parity release.
+
+ -- "chenshichao" <chenshichao@elibot.cn>  Mon, 02 Nov 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-calibration (1.0.3-1noble) noble; urgency=high
+
+  * Consume the Elite CS Series SDK through its exported CMake target.
+  * Preserve SDK usage requirements for Debian multiarch builds.
+  * Contributors: Yan
+
+ -- "chenshichao" <chenshichao@elibot.cn>  Sun, 30 Aug 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-calibration (1.0.2-1noble) noble; urgency=high
+
+  * Use the SDK ROS package metadata without a version constraint.
+  * Standardize the package maintainer metadata.
+  * Contributors: Yan
+
+ -- "chenshichao" <chenshichao@elibot.cn>  Thu, 27 Aug 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-calibration (1.0.1-1noble) noble; urgency=high
+
+  * Declare the Elite CS Series SDK dependency required by the calibration tool.
+  * Declare the launch dependencies used by the package.
+  * Contributors: Ivan
+
+ -- "chenshichao" <chenshichao@elibot.cn>  Sun, 23 Aug 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-calibration (1.0.0-1noble) noble; urgency=high
+
+  * First public release of the Elite Robots factory calibration correction tool.
+  * Renamed the package to ``elite_robots_calibration``.
+  * Contributors: Yan
+
+ -- "chenshichao" <chenshichao@elibot.cn>  Tue, 28 Jul 2026 16:00:00 -0000
+
+

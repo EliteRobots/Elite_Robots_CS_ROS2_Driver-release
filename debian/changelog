@@ -1,0 +1,37 @@
+ros-jazzy-elite-robots-msgs (1.2.0-1bookworm) bookworm; urgency=high
+
+  * Add collision detection, collision sensitivity, and mounting plane service definitions.
+  * Synchronize the package version to 1.2.0 for the Jazzy feature parity release.
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Mon, 02 Nov 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-msgs (1.0.3-1bookworm) bookworm; urgency=high
+
+  * Synchronize the package version for the repository-wide SDK CMake target integration fix.
+  * Contributors: Yan
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Sun, 30 Aug 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-msgs (1.0.2-1bookworm) bookworm; urgency=high
+
+  * Standardize the package maintainer metadata.
+  * Contributors: Yan
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Thu, 27 Aug 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-msgs (1.0.1-1bookworm) bookworm; urgency=high
+
+  * Declare the geometry messages dependency used by ``SetPayload``.
+  * Contributors: Ivan
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Sun, 23 Aug 2026 16:00:00 -0000
+
+ros-jazzy-elite-robots-msgs (1.0.0-1bookworm) bookworm; urgency=high
+
+  * First public release of the Elite Robots message and service interfaces.
+  * Renamed the package to ``elite_robots_msgs``.
+  * Contributors: Yan
+
+ -- "Yan" <yanxiaojia@elibot.cn>  Tue, 28 Jul 2026 16:00:00 -0000
+
+

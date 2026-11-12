@@ -1,5 +1,0 @@
-# Service to log
-string message
----
-string message
-bool success
